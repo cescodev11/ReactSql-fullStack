@@ -1,4 +1,4 @@
-import React, { useContext, useState } from "react";
+import React, { useState, useContext } from "react";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
 import { AuthContext } from "../helpers/AuthContext";
@@ -16,22 +16,28 @@ function Login() {
     setCredentials((prev) => ({ ...prev, [name]: value }));
   };
 
-  const login = async () => {
+  const handleLogin = async () => {
     try {
       const response = await axios.post(
         "http://localhost:3001/auth/login",
         credentials
       );
-      if (response.data.error) {
+
+      // Check if there's an error in the response
+      if (response.data && response.data.error) {
         alert(response.data.error);
-      } else {
-        localStorage.setItem("accessToken", response.data);
-        setAuthState(true);
+      } else if (response.data && response.data.token) {
+        // If login is successful
+        const { token, username, id } = response.data;
+        localStorage.setItem("accessToken", token);
+        setAuthState({ username, id, status: true });
         navigate("/");
+      } else {
+        alert("Unexpected response from server.");
       }
     } catch (error) {
-      console.error("Login error:", error);
-      alert("An error occurred while logging in. Please try again.");
+      console.error("Error during login:", error);
+      alert("An error occurred. Please try again.");
     }
   };
 
@@ -44,7 +50,6 @@ function Login() {
         name="username"
         value={credentials.username}
         onChange={handleChange}
-        placeholder="Enter your username"
       />
       <label htmlFor="password">Password:</label>
       <input
@@ -53,9 +58,8 @@ function Login() {
         name="password"
         value={credentials.password}
         onChange={handleChange}
-        placeholder="Enter your password"
       />
-      <button onClick={login}>Login</button>
+      <button onClick={handleLogin}>Login</button>
     </div>
   );
 }
