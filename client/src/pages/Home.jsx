@@ -1,71 +1,95 @@
-import React, { useState, useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import axios from "axios";
-import { useNavigate } from "react-router-dom";
+import ThumbUpIcon from "@mui/icons-material/ThumbUp";
+import { useNavigate } from "react-router-dom"; // Use useNavigate
 
 function Home() {
   const [listOfPosts, setListOfPosts] = useState([]);
-  const navigate = useNavigate();
+  const [likedPosts, setLikedPosts] = useState([]);
+  const navigate = useNavigate(); // Replace useHistory with useNavigate
 
-  // Fetching posts on component mount
   useEffect(() => {
-    const fetchPosts = async () => {
-      try {
-        const response = await axios.get("http://localhost:3001/posts");
-        setListOfPosts(response.data);
-      } catch (error) {
-        console.error("Error fetching posts:", error);
-      }
-    };
-    fetchPosts();
+    axios
+      .get("http://localhost:3001/posts", {
+        headers: { accessToken: localStorage.getItem("accessToken") },
+      })
+      .then((response) => {
+        setListOfPosts(response.data.listOfPosts);
+        setLikedPosts(
+          response.data.likedPosts.map((like) => {
+            return like.PostId;
+          })
+        );
+      });
   }, []);
 
-  // Handling the like/unlike functionality
-  const likeAPost = async (postId) => {
-    try {
-      const response = await axios.post(
+  const likeAPost = (postId) => {
+    axios
+      .post(
         "http://localhost:3001/likes",
         { PostId: postId },
         { headers: { accessToken: localStorage.getItem("accessToken") } }
-      );
-
-      // Updating the state based on the like status
-      setListOfPosts((prevPosts) =>
-        prevPosts.map((post) =>
-          post.id === postId
-            ? {
-                ...post,
-                Likes: response.data.liked
-                  ? [...post.Likes, 0]
-                  : post.Likes.slice(0, post.Likes.length - 1),
+      )
+      .then((response) => {
+        setListOfPosts(
+          listOfPosts.map((post) => {
+            if (post.id === postId) {
+              if (response.data.liked) {
+                return { ...post, Likes: [...post.Likes, 0] };
+              } else {
+                const likesArray = post.Likes;
+                likesArray.pop();
+                return { ...post, Likes: likesArray };
               }
-            : post
-        )
-      );
-    } catch (error) {
-      console.error("Error liking the post:", error);
-    }
+            } else {
+              return post;
+            }
+          })
+        );
+
+        if (likedPosts.includes(postId)) {
+          setLikedPosts(
+            likedPosts.filter((id) => {
+              return id != postId;
+            })
+          );
+        } else {
+          setLikedPosts([...likedPosts, postId]);
+        }
+      });
   };
 
   return (
     <div>
-      {listOfPosts.map((post) => (
-        <div key={post.id} className="post">
-          <div className="title">{post.title}</div>
-          <div
-            className="body"
-            onClick={() => {
-              navigate(`/post/${post.id}`);
-            }}
-          >
-            {post.postText}
+      {listOfPosts.map((value, key) => {
+        return (
+          <div key={key} className="post">
+            <div className="title"> {value.title} </div>
+            <div
+              className="body"
+              onClick={() => {
+                navigate(`/post/${value.id}`); // Replace history.push with navigate
+              }}
+            >
+              {value.postText}
+            </div>
+            <div className="footer">
+              <div className="username">{value.username}</div>
+              <div className="buttons">
+                <ThumbUpIcon
+                  onClick={() => {
+                    likeAPost(value.id);
+                  }}
+                  className={
+                    likedPosts.includes(value.id) ? "unlikeBttn" : "likeBttn"
+                  }
+                />
+                <label> {value.Likes.length}</label>
+              </div>
+            </div>
           </div>
-          <div className="footer">
-            {post.username}{" "}
-            <button onClick={() => likeAPost(post.id)}>Like</button>
-            <label>{post.Likes.length}</label>
-          </div>
-        </div>
-      ))}
+        );
+      })}
     </div>
   );
 }
