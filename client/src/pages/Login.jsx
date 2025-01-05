@@ -1,65 +1,50 @@
 import React, { useState, useContext } from "react";
 import axios from "axios";
-import { useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom"; // Updated for React Router v6
 import { AuthContext } from "../helpers/AuthContext";
 
 function Login() {
-  const [credentials, setCredentials] = useState({
-    username: "",
-    password: "",
-  });
+  const [username, setUsername] = useState("");
+  const [password, setPassword] = useState("");
   const { setAuthState } = useContext(AuthContext);
-  const navigate = useNavigate();
 
-  const handleChange = (e) => {
-    const { name, value } = e.target;
-    setCredentials((prev) => ({ ...prev, [name]: value }));
-  };
+  const navigate = useNavigate(); // Using useNavigate instead of useHistory
 
-  const handleLogin = async () => {
-    try {
-      const response = await axios.post(
-        "http://localhost:3001/auth/login",
-        credentials
-      );
-
-      // Check if there's an error in the response
-      if (response.data && response.data.error) {
+  const login = () => {
+    const data = { username: username, password: password };
+    axios.post("http://localhost:3001/auth/login", data).then((response) => {
+      if (response.data.error) {
         alert(response.data.error);
-      } else if (response.data && response.data.token) {
-        // If login is successful
-        const { token, username, id } = response.data;
-        localStorage.setItem("accessToken", token);
-        setAuthState({ username, id, status: true });
-        navigate("/");
       } else {
-        alert("Unexpected response from server.");
+        localStorage.setItem("accessToken", response.data.token);
+        setAuthState({
+          username: response.data.username,
+          id: response.data.id,
+          status: true,
+        });
+        navigate("/"); // Use navigate to redirect
       }
-    } catch (error) {
-      console.error("Error during login:", error);
-      alert("An error occurred. Please try again.");
-    }
+    });
   };
 
   return (
     <div className="loginContainer">
-      <label htmlFor="username">Username:</label>
+      <label>Username:</label>
       <input
-        id="username"
         type="text"
-        name="username"
-        value={credentials.username}
-        onChange={handleChange}
+        onChange={(event) => {
+          setUsername(event.target.value);
+        }}
       />
-      <label htmlFor="password">Password:</label>
+      <label>Password:</label>
       <input
-        id="password"
         type="password"
-        name="password"
-        value={credentials.password}
-        onChange={handleChange}
+        onChange={(event) => {
+          setPassword(event.target.value);
+        }}
       />
-      <button onClick={handleLogin}>Login</button>
+
+      <button onClick={login}> Login </button>
     </div>
   );
 }

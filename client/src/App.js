@@ -8,7 +8,6 @@ import Login from "./pages/Login";
 import { AuthContext } from "./helpers/AuthContext";
 import { useState, useEffect } from "react";
 import axios from "axios";
-import PageNotFound from "./pages/PageNotFound";
 
 function App() {
   const [authState, setAuthState] = useState({
@@ -35,7 +34,7 @@ function App() {
           });
         }
       });
-  }, [authState]);
+  }, []);
 
   const logout = () => {
     localStorage.removeItem("accessToken");
@@ -48,28 +47,30 @@ function App() {
         <Router>
           <div className="navbar">
             <div className="links">
-              <Link to="/"> Home Page</Link>
-              <Link to="/createpost"> Create A Post</Link>
+              <Link to="/">Home Page</Link>
+              <Link to="/createpost">Create A Post</Link>
               {!authState.status && (
                 <>
-                  <Link to="/login"> Login</Link>
-                  <Link to="/registration"> Registration</Link>
+                  <Link to="/login">Login</Link>
+                  <Link to="/registration">Registration</Link>
                 </>
               )}
             </div>
             <div className="loggedInContainer">
-              <h1>{authState.username} </h1>
-              {authState.status && <button onClick={logout}> Logout</button>}
+              <h1>{authState.username}</h1>
+              {authState.status && <button onClick={logout}>Logout</button>}
             </div>
           </div>
           <Routes>
+            {" "}
+            {/* Updated to use Routes instead of Switch */}
             <Route path="/" element={<Home />} />
             <Route path="/createpost" element={<CreatePost />} />
             <Route path="/post/:id" element={<Post />} />
             <Route path="/registration" element={<Registration />} />
             <Route path="/login" element={<Login />} />
-            <Route path="*" element={<PageNotFound />} />
-          </Routes>
+          </Routes>{" "}
+          {/* Updated to use Routes instead of Switch */}
         </Router>
       </AuthContext.Provider>
     </div>

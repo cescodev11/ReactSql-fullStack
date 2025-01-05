@@ -2,10 +2,10 @@ import React from "react";
 import { Formik, Form, Field, ErrorMessage } from "formik";
 import * as Yup from "yup";
 import axios from "axios";
-import { useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom"; // Updated for React Router v6
 
 function CreatePost() {
-  const navigate = useNavigate();
+  const navigate = useNavigate(); // Using useNavigate for navigation in React Router v6
 
   const initialValues = {
     title: "",
@@ -15,16 +15,13 @@ function CreatePost() {
 
   const validationSchema = Yup.object().shape({
     title: Yup.string().required("You must input a Title!"),
-    postText: Yup.string().required("You must input the Post Text!"),
-    username: Yup.string()
-      .min(3, "Username must be at least 3 characters long.")
-      .max(15, "Username cannot exceed 15 characters.")
-      .required("You must input a Username!"),
+    postText: Yup.string().required("You must input some text for your post!"),
+    username: Yup.string().min(3).max(15).required("Username is required!"),
   });
 
   const onSubmit = (data) => {
-    axios.post("http://localhost:3001/posts", data).then(() => {
-      navigate("/"); // Updated for React Router v6
+    axios.post("http://localhost:3001/posts", data).then((response) => {
+      navigate("/"); // Using navigate to route to home page after post creation
     });
   };
 
@@ -36,32 +33,38 @@ function CreatePost() {
         validationSchema={validationSchema}
       >
         <Form className="formContainer">
-          <label htmlFor="title">Title: </label>
-          <ErrorMessage name="title" component="span" />
-          <Field
-            autoComplete="off"
-            id="inputCreatePost"
-            name="title"
-            placeholder="(Ex. Title...)"
-          />
+          <div>
+            <label>Title: </label>
+            <ErrorMessage name="title" component="span" />
+            <Field
+              autoComplete="off"
+              id="inputCreatePost"
+              name="title"
+              placeholder="(Ex. Title...)"
+            />
+          </div>
 
-          <label htmlFor="postText">Post: </label>
-          <ErrorMessage name="postText" component="span" />
-          <Field
-            autoComplete="off"
-            id="inputCreatePost"
-            name="postText"
-            placeholder="(Ex. Post...)"
-          />
+          <div>
+            <label>Post: </label>
+            <ErrorMessage name="postText" component="span" />
+            <Field
+              autoComplete="off"
+              id="inputCreatePost"
+              name="postText"
+              placeholder="(Ex. Post...)"
+            />
+          </div>
 
-          <label htmlFor="username">Username: </label>
-          <ErrorMessage name="username" component="span" />
-          <Field
-            autoComplete="off"
-            id="inputCreatePost"
-            name="username"
-            placeholder="(Ex. John123...)"
-          />
+          <div>
+            <label>Username: </label>
+            <ErrorMessage name="username" component="span" />
+            <Field
+              autoComplete="off"
+              id="inputCreatePost"
+              name="username"
+              placeholder="(Ex. John123...)"
+            />
+          </div>
 
           <button type="submit">Create Post</button>
         </Form>
