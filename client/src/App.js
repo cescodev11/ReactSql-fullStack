@@ -8,6 +8,7 @@ import Login from "./pages/Login";
 import { AuthContext } from "./helpers/AuthContext";
 import { useState, useEffect } from "react";
 import axios from "axios";
+import PageNotFound from "./pages/PageNotFound";
 
 function App() {
   const [authState, setAuthState] = useState({
@@ -47,12 +48,15 @@ function App() {
         <Router>
           <div className="navbar">
             <div className="links">
-              <Link to="/">Home Page</Link>
-              <Link to="/createpost">Create A Post</Link>
-              {!authState.status && (
+              {!authState.status ? (
                 <>
                   <Link to="/login">Login</Link>
                   <Link to="/registration">Registration</Link>
+                </>
+              ) : (
+                <>
+                  <Link to="/">Home Page</Link>
+                  <Link to="/createpost">Create A Post</Link>
                 </>
               )}
             </div>
@@ -62,15 +66,13 @@ function App() {
             </div>
           </div>
           <Routes>
-            {" "}
-            {/* Updated to use Routes instead of Switch */}
             <Route path="/" element={<Home />} />
             <Route path="/createpost" element={<CreatePost />} />
             <Route path="/post/:id" element={<Post />} />
             <Route path="/registration" element={<Registration />} />
             <Route path="/login" element={<Login />} />
-          </Routes>{" "}
-          {/* Updated to use Routes instead of Switch */}
+            <Route path="*" element={<PageNotFound />} />
+          </Routes>
         </Router>
       </AuthContext.Provider>
     </div>

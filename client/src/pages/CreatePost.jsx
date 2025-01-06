@@ -1,22 +1,29 @@
-import React from "react";
+import React, { useContext, useEffect } from "react";
 import { Formik, Form, Field, ErrorMessage } from "formik";
 import * as Yup from "yup";
 import axios from "axios";
 import { useNavigate } from "react-router-dom"; // Updated for React Router v6
+import { AuthContext } from "../helpers/AuthContext";
 
 function CreatePost() {
+  const { authState } = useContext(AuthContext);
+
   const navigate = useNavigate(); // Using useNavigate for navigation in React Router v6
 
   const initialValues = {
     title: "",
     postText: "",
-    username: "",
   };
+
+  useEffect(() => {
+    if (!authState.status) {
+      navigate("/login");
+    }
+  }, []);
 
   const validationSchema = Yup.object().shape({
     title: Yup.string().required("You must input a Title!"),
     postText: Yup.string().required("You must input some text for your post!"),
-    username: Yup.string().min(3).max(15).required("Username is required!"),
   });
 
   const onSubmit = (data) => {
@@ -52,17 +59,6 @@ function CreatePost() {
               id="inputCreatePost"
               name="postText"
               placeholder="(Ex. Post...)"
-            />
-          </div>
-
-          <div>
-            <label>Username: </label>
-            <ErrorMessage name="username" component="span" />
-            <Field
-              autoComplete="off"
-              id="inputCreatePost"
-              name="username"
-              placeholder="(Ex. John123...)"
             />
           </div>
 
