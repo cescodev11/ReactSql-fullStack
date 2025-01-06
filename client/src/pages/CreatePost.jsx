@@ -27,9 +27,13 @@ function CreatePost() {
   });
 
   const onSubmit = (data) => {
-    axios.post("http://localhost:3001/posts", data).then((response) => {
-      navigate("/"); // Using navigate to route to home page after post creation
-    });
+    axios
+      .post("http://localhost:3001/posts", data, {
+        headers: { accessToken: localStorage.getItem("accessToken") },
+      })
+      .then((response) => {
+        navigate("/"); // Using navigate to route to home page after post creation
+      });
   };
 
   return (
